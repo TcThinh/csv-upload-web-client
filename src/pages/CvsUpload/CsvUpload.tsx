@@ -13,6 +13,7 @@ import {
 const CsvUpload = () => {
   const [estates, setEstates] = useState<Estate[] | undefined>([]);
   const [message, setMessage] = useState("");
+  const [isValidDocument, setIsValidDocument] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const reader = useRef(new window.FileReader());
 
@@ -33,13 +34,12 @@ const CsvUpload = () => {
           estatesDataRaw[0] as string[]
         );
 
-        if (isValid) {
-          const transformedData = transformEstateDocument(estatesDataRaw);
-          setEstates(transformedData);
-        } else {
-          setEstates([]);
-        }
+        let transformedData: Estate[] = [];
 
+        if (isValid) transformedData = transformEstateDocument(estatesDataRaw);
+
+        setEstates(transformedData);
+        setIsValidDocument(isValid);
         setMessage(msg);
       }
     };
@@ -102,14 +102,15 @@ const CsvUpload = () => {
           <label className="button" htmlFor="file-choose-input">
             Choose a file
           </label>
-
-          <button
-            className="button"
-            onClick={() => handleUploadAction()}
-            disabled={isLoading}
-          >
-            {isLoading ? "uploading..." : "Upload data"}
-          </button>
+          {isValidDocument && (
+            <button
+              className="button"
+              onClick={() => handleUploadAction()}
+              disabled={isLoading}
+            >
+              {isLoading ? "Uploading..." : "Upload data"}
+            </button>
+          )}
         </div>
       </div>
 

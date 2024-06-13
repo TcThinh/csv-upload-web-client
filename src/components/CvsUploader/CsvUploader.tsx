@@ -13,7 +13,8 @@ import {
 
 const CsvUploader = () => {
   const [estates, setEstates] = useState<Estate[] | undefined>([]);
-  const [verifyDocumentMessage, setVerifyDocumentMessage] = useState("");
+  const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const reader = useRef(new window.FileReader());
 
   const readFile = (file: File) => {
@@ -29,7 +30,7 @@ const CsvUploader = () => {
       if (parsedContent && parsedContent.data) {
         const estatesDataRaw = parsedContent.data;
 
-        const [isValid, message] = checkEstateDocument(
+        const [isValid, msg] = checkEstateDocument(
           estatesDataRaw[0] as string[]
         );
 
@@ -38,7 +39,7 @@ const CsvUploader = () => {
           setEstates(transformedData);
         }
 
-        setVerifyDocumentMessage(message);
+        setMessage(msg);
       }
     };
     if (file) reader.current.readAsText(file, encoding);
@@ -51,10 +52,37 @@ const CsvUploader = () => {
     }
   };
 
+  const handleUploadAction = () => {
+    if (!estates) {
+      setMessage("Upload csv file to get data");
+      return;
+    }
+    setIsLoading(true);
+    fetch("http://localhost:3000/estates", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ estates }),
+    })
+      .then((response) => {
+        if (response.status !== 200) {
+          setMessage("Something went wrong");
+        }
+        return response.json();
+      })
+      .then(() => {
+        setIsLoading(false);
+        alert("Data saved");
+      })
+      .catch((error) => {
+        console.log(error);
+        setMessage("Request error");
+      });
+  };
+
   return (
     <>
       <div style={{}}>
-        <div className="message">{verifyDocumentMessage}</div>
+        <div className="message">{message}</div>
 
         <h1>Upload or whatever</h1>
         <div className="buttons-wrapper">
@@ -70,7 +98,13 @@ const CsvUploader = () => {
             Choose a file
           </label>
 
-          <label className="button">Upload data</label>
+          <button
+            className="button"
+            onClick={() => handleUploadAction()}
+            disabled={isLoading}
+          >
+            {isLoading ? "Loading..." : "Upload data"}
+          </button>
         </div>
       </div>
 

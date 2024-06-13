@@ -1,10 +1,10 @@
 import "./App.css";
-import FileInput from "./components/CvsUploader/CsvUploader";
+import CsvUpload from "./pages/CvsUpload/CsvUpload";
 
 function App() {
   return (
     <div>
-      <FileInput />
+      <CsvUpload />
     </div>
   );
 }

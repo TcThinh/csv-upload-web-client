@@ -2,8 +2,7 @@ import { ChangeEvent, useRef, useState } from "react";
 import DataTable from "react-data-table-component";
 import PapaParse from "papaparse";
 
-import "./CsvUploader.css";
-import Loading from "../Loading";
+import "./CsvUpload.css";
 import { estateColumns } from "../../helpers/dataColumns";
 import { Estate } from "../../types/estate";
 import {
@@ -11,7 +10,7 @@ import {
   transformEstateDocument,
 } from "../../helpers/functions";
 
-const CsvUploader = () => {
+const CsvUpload = () => {
   const [estates, setEstates] = useState<Estate[] | undefined>([]);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -37,6 +36,8 @@ const CsvUploader = () => {
         if (isValid) {
           const transformedData = transformEstateDocument(estatesDataRaw);
           setEstates(transformedData);
+        } else {
+          setEstates([]);
         }
 
         setMessage(msg);
@@ -53,12 +54,13 @@ const CsvUploader = () => {
   };
 
   const handleUploadAction = () => {
-    if (!estates) {
+    if (!estates || !estates.length) {
       setMessage("Upload csv file to get data");
       return;
     }
     setIsLoading(true);
     fetch("http://localhost:3000/estates", {
+      // localhost:3000 should be move to env file
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ estates }),
@@ -71,6 +73,7 @@ const CsvUploader = () => {
       })
       .then(() => {
         setIsLoading(false);
+        setEstates([]);
         alert("Data saved");
       })
       .catch((error) => {
@@ -81,10 +84,12 @@ const CsvUploader = () => {
 
   return (
     <>
-      <div style={{}}>
+      <div>
         <div className="message">{message}</div>
 
-        <h1>Upload or whatever</h1>
+        <div className="title">
+          <h1>Csv Uploader</h1>
+        </div>
         <div className="buttons-wrapper">
           <input
             id="file-choose-input"
@@ -103,20 +108,18 @@ const CsvUploader = () => {
             onClick={() => handleUploadAction()}
             disabled={isLoading}
           >
-            {isLoading ? "Loading..." : "Upload data"}
+            {isLoading ? "uploading..." : "Upload data"}
           </button>
         </div>
       </div>
 
       <div className="table-wrapper">
-        {/* <Loading /> */}
         <DataTable
           columns={estateColumns}
           data={estates as Estate[]}
           highlightOnHover
           pagination
           striped={true}
-          progressComponent={<Loading />}
           noDataComponent={<div>No record</div>}
           className="table"
         />
@@ -125,4 +128,4 @@ const CsvUploader = () => {
   );
 };
 
-export default CsvUploader;
+export default CsvUpload;

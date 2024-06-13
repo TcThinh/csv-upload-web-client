@@ -1,5 +1,5 @@
 import "./App.css";
-import CSVUploader from "./components/CSVUploader";
+import CSVUploader from "./components/CsvUploader";
 
 function App() {
   return (
